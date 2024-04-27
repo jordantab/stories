@@ -11,23 +11,7 @@ import { HiOutlineTrash } from "react-icons/hi";
 import { LuDownload } from "react-icons/lu";
 import { MdOutlineFileUpload } from "react-icons/md";
 
-interface Page {
-  number: number,
-  title: string,
-  text: string,
-  type: "query" | "display",
-  img_url: string,
-}
-
-interface Story {
-  _id: string,
-  name: string,
-  company: string,
-  tagline: string,
-  pages: Page[],
-}
-
-const HOST="http://localhost:5000/"
+import { HOST, Story, Page } from './shared'
 
 function Admin() {
   const [items, setItems] = useState<Story[]>([])

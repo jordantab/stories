@@ -63,6 +63,8 @@ def create_app():
     @app.route('/stories/<story_id>', methods=['GET'])
     def get_story(story_id):
         stories_collection = db.stories
+        print('story_id', story_id)
+        print('all', list(stories_collection.find({})))
 
         try:
             oid = ObjectId(story_id)

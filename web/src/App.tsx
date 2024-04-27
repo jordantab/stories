@@ -18,7 +18,7 @@ const router = createBrowserRouter([
     element: <Admin/>,
   },
   {
-    path: "/story",
+    path: "/story/:story_id",
     element: <Story/>,
   },
 ]);
