@@ -127,13 +127,20 @@ function story(story: Story) {
         }
       }
       console.log("Filtered list", filtered)
+      const element = document.createElement("a");
+      const file = new Blob([JSON.stringify(filtered)], {type: 'text/json'});
+      element.href = URL.createObjectURL(file);
+      element.download = story._id + "-leads.json";
+      document.body.appendChild(element); // Required for this to work in FireFox
+      element.click();
+      console.log("Leads list should be downloaded now")
     }).catch(err => {
       console.log("ERR:", err)
     })
   }
 
   return (
-    <div className="w-full border p-4 rounded flex flex-row justify-between items-center">
+    <div key={story._id} className="w-full border p-4 rounded flex flex-row justify-between items-center">
       <div className="flex flex-col">
         <div className="text-lg font-bold">{story.name}</div>
         <div className="text-md">{story.tagline}</div>
