@@ -16,7 +16,7 @@ def create_app():
     app.config['UPLOAD_FOLDER'] = 'uploads/'
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
     app.config['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
-    
+
     CORS(app, origins="*")
 
     uri = "mongodb+srv://temp_user:1234@stories.detzj4q.mongodb.net/?retryWrites=true&w=majority&appName=Stories"
@@ -70,7 +70,7 @@ def create_app():
                     text_by_page.append("")
         # print(5)
         return text_by_page
-    
+
     def generate_embeddings(text_list, openai_api_key):
         openai.api_key = openai_api_key
 
@@ -92,6 +92,34 @@ def create_app():
             raise
 
         return embeddings
+
+    def generate_image(slide_text):
+        openai.api_key = app.config['OPENAI_API_KEY']
+        res = openai.chat.completions.create(
+          model="gpt-3.5-turbo",
+          messages=[
+            {"role": "system", "content": "You are an image prompt helper who creates a prompt for an image generator which describes a sleek and beautiful visualization to go along with slide text"},
+            {"role": "user", "content": slide_text}
+          ]
+        )
+        image_prompt = res.choices[0].message.content
+        response = openai.images.generate(
+          model="dall-e-3",
+          prompt=image_prompt,
+          size="1024x1024",
+          quality="standard",
+          n=1,
+        )
+        image_url = response.data[0].url
+        return image_url
+
+#     test_text = """Organizations realize the value data plays as a strategic asset for various
+# business-related initiatives, such as growing revenues, improving the customer
+# experience, operating efficiently or improving a product or service. However,
+# accessing and managing data for these initiatives has become increasingly
+# complex. """
+#     print(generate_image(test_text))
+#     exit()
 
     @app.route('/stories/', methods=['POST'])
     def create_story():
@@ -133,7 +161,7 @@ def create_app():
             # Insert story metadata and embeddings into MongoDB
             result = db.stories.insert_one(story_data)
             new_story = db.stories.find_one({'_id': result.inserted_id})
-            
+
             if new_story:
                 new_story_data = {key: str(value) if isinstance(value, ObjectId) else value for key, value in new_story.items()}
                 return jsonify({'message': 'Story created successfully', 'story': new_story_data}), 201
