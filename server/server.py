@@ -37,14 +37,15 @@ def create_app():
 
         return jsonify(stories_data)
     
-    @app.route('/stories/<name>', methods=['GET'])
-    def get_story(name):
+    @app.route('/stories/<story_id>', methods=['GET'])
+    def get_story(story_id):
         stories_collection = db.stories
 
         try:
-            story = stories_collection.find_one({'name': name})
+            oid = ObjectId(story_id)
+            story = stories_collection.find_one({'story_id': oid})
         except:
-            return jsonify({'error': 'Invalid story name'}), 400
+            return jsonify({'error': 'Invalid story story_id'}), 400
 
         if story:
             story_data = {key: str(value) if isinstance(value, ObjectId) else value for key, value in story.items()}
