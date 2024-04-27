@@ -4,8 +4,14 @@
     "tagline": "Just do it!",
     "pages": [
         {
-            "story_id": 1,
             "number": 0,
+            "title": "Introduction",
+            "text": "Hello",
+            "img_url": "",
+            "type": "display"
+        },
+        {
+            "number": 1,
             "title": "Introduction",
             "text": "Hello",
             "img_url": "",
