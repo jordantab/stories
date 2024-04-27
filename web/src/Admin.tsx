@@ -40,9 +40,10 @@ function Admin() {
 
   function createStory() {
     const formData = new FormData();
-    files.forEach((file: any, index: number) => {
-      formData.append(`file-${index}`, file);
-    });
+    // files.forEach((file: any, index: number) => {
+    //   formData.append(`file-${index}`, file);
+    // });
+    formData.append("file", files[0])
 
     const config = {
       headers: {
