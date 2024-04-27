@@ -16,6 +16,8 @@ import { MdOutlineFileUpload } from "react-icons/md";
 import { HOST, Story, Page } from './shared'
 
 function Admin() {
+  const [name, setName] = useState("")
+  const [tagline, setTagline] = useState("")
   const [items, setItems] = useState<Story[]>([])
   const [showModal, setShowModal] = useState(false)
   const [files, setFiles] = useState<any>([])
@@ -50,6 +52,8 @@ function Admin() {
     //   formData.append(`file-${index}`, file);
     // });
     formData.append("file", files[0])
+    formData.append("name", name)
+    formData.append("tagline", tagline)
 
     const config = {
       headers: {
@@ -72,14 +76,21 @@ function Admin() {
   function Modal() {
     return (
       <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex justify-center items-center">
-        <div className="bg-white p-6 rounded-lg shadow-lg">
+        <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col space-y-2">
             <h2 className="text-3xl font-bold mb-4">New Story</h2>
             <p className="mb-4 text-gray-500">Story will be automatically generated with GenAI from any of your existing white papers or docs</p>
+
+            <p className="text-sm">Pick a name</p>
+            <input className="border rounded p-1" type="text" placeholder="Type your name here" value={name} onChange={ev => setName(ev.target.value)} />
+
+            <p className="text-sm">Pick a tagline</p>
+            <input className="border rounded p-1" type="text" placeholder="Type your tagline here" value={tagline} onChange={ev => setTagline(ev.target.value)} />
+
             <p className="text-sm">Upload your pdf</p>
             <div {...getRootProps({ className: 'dropzone border border-gray-300 rounded-lg p-10 text-center' })}>
                 <input {...getInputProps()} />
                 <div className="flex flex-row justify-center items-center space-x-2"><MdOutlineFileUpload size={18} /><p>Drop files here</p></div>
-                {files.map((f: any) => <div>{f.name}</div>)}
+                {files.map((f: any) => <div key={f.name}>{f.name}</div>)}
               </div>
             <div className="flex flex-row justify-end pt-4 space-x-4">
               <button className="bg-gray-100 hover:bg-gray-300 border font-bold py-2 px-4 rounded"
