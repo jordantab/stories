@@ -57,7 +57,10 @@ function StoryPage() {
           return (<div key={i}>{makeBar(i <= index)}</div>)
         })}
       </div>
-      <div className="flex-grow">Content</div>
+      <div className="flex-grow flex flex-col justify-center space-y-4 py-8 px-20">
+        <h2 className="text-6xl font-bold">{page.title}</h2>
+        <p className="text-2xl">{page.text}</p>
+      </div>
       <div className="flex flex-row justify-between p-8">
         <IoArrowBackCircle size={arrowSize} />
         <IoArrowForwardCircle size={arrowSize} />
