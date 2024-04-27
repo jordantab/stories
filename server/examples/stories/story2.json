@@ -1,0 +1,21 @@
+{
+    "name": "test2",
+    "company": "Nike",
+    "tagline": "Be legendary.",
+    "pages": [
+        {
+            "number": 0,
+            "title": "Title Page",
+            "text": "Be legendary",
+            "img_url": "",
+            "type": "display"
+        },
+        {
+            "number": 1,
+            "title": "Introductio Page",
+            "text": "Introduction",
+            "img_url": "",
+            "type": "display"
+        }
+    ]
+}
