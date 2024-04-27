@@ -8,6 +8,7 @@ export interface Page {
   text: string,
   type: "query" | "display",
   img_url: string,
+  query_key?: string,
 }
 
 export interface Story {

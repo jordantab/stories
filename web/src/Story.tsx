@@ -35,6 +35,7 @@ const TEST_PAGE_2: Page = {
   title: "",
   text: "Let's start with your email",
   type: "query",
+  query_key: "email",
   img_url: "",
 }
 
@@ -62,11 +63,11 @@ function StoryPage() {
   }
 
   function nextPage() {
-    if (page !== undefined && page.type === "query") {
+    if (page !== undefined && page.type === "query" && page.query_key !== undefined) {
       console.log("leadId is now", leadId)
-      axios.post(HOST + "leads/" + leadId, {
-
-      }).then(res => {
+      let data: any = {}
+      data[page.query_key] = queryResponse
+      axios.post(HOST + "leads/" + leadId, data).then(res => {
         console.log("Success!", res.data)
         loadPage(index + 1)
       }).catch(err => {
