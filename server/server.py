@@ -74,8 +74,7 @@ def create_app():
     def generate_embeddings(text_list, openai_api_key):
         openai.api_key = openai_api_key
 
-        # Adjusting to use the newer model as per the example provided
-        model_version = "text-embedding-ada-002"  # Adjust model as necessary
+        model_version = "text-embedding-ada-002"
 
         embeddings = []
         try:
@@ -85,9 +84,9 @@ def create_app():
                 input=text,
                 model="text-embedding-ada-002"
                 )
-                print(response)
-                if response and 'data' in response:
-                    embeddings.append(response['data'][0]['embedding'])
+                print(response.data)
+                if response:
+                    embeddings.append(response.data[0].embedding)
         except Exception as e:
             print(f"An error occurred while generating embeddings: {e}")
             raise
@@ -115,10 +114,9 @@ def create_app():
 
         # Parse additional story data from form or JSON
         story_data = request.form.to_dict()
-        print(story_data)
 
-        # if not story_data:
-        #     return jsonify({"error": "No story data provided"}), 400
+        if not story_data:
+            return jsonify({"error": "No story data provided"}), 400
 
         # Insert story metadata into MongoDB
         try:
@@ -126,7 +124,7 @@ def create_app():
             text_by_page = extract_text_from_pdf(file_path)
             # print("text_by_page", text_by_page)
             embeddings = generate_embeddings(text_by_page, app.config['OPENAI_API_KEY'])
-            print("embeddings", embeddings)
+            # print("embeddings", embeddings)
 
             # Include file path and embeddings in the story data
             story_data['file_path'] = file_path
