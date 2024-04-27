@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 
+import { Link } from 'react-router-dom'
+
 import axios from 'axios'
 
 import { useDropzone } from 'react-dropzone';
@@ -25,14 +27,18 @@ function Admin() {
     }
   });
 
-  useEffect(() => {
-    console.log('Component loaded');
+  function fetchStories() {
     let stories = axios.get(HOST + "stories").then(res => {
-    console.log("Got stories list", res.data)
+      console.log("Got stories list", res.data)
       setItems(res.data)
     }).catch(err => {
       console.log("ERR:", err)
-    })
+    });
+  }
+
+  useEffect(() => {
+    console.log('Component loaded');
+    fetchStories();
     return () => {
       console.log('Component unmounted');
     };
@@ -56,6 +62,7 @@ function Admin() {
         console.log(response.data);
         setShowModal(false)
         console.log("Upload complete")
+        fetchStories();
       })
       .catch((error) => {
         console.error("Error uploading files: ", error);
@@ -117,7 +124,7 @@ function story(story: Story) {
       </div>
       <div className="flex flex-row space-x-4">
         <button className="border rounded p-2 flex flex-row space-x-2"><LuDownload size={24} /><div className="font-bold">Download leads</div></button>
-        <button className="border rounded p-2"><MdOutlineShare size={24} /></button>
+        <Link to={"/story/" + story._id}><button className="border rounded p-2"><MdOutlineShare size={24} /></button></Link>
         <button className="border rounded p-2"><HiOutlineTrash size={24} /></button>
       </div>
     </div>
