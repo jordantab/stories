@@ -66,7 +66,7 @@ def create_app():
 
         try:
             oid = ObjectId(story_id)
-            story = stories_collection.find_one({'story_id': oid})
+            story = stories_collection.find_one({'_id': oid})
         except:
             return jsonify({'error': 'Invalid story story_id'}), 400
 
