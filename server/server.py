@@ -19,7 +19,7 @@ def create_app():
             print("Pinged your deployment. You successfully connected to MongoDB!")
         except Exception as e:
             print(e)
-    
+
     @app.route('/')
     def home():
         return 'Hello, World!'
@@ -36,7 +36,7 @@ def create_app():
         } for story in stories]
 
         return jsonify(stories_data)
-    
+
     @app.route('/stories/', methods=['POST'])
     def create_story():
         print("Creating story...\n")
@@ -59,12 +59,10 @@ def create_app():
             return jsonify({'message': 'Story created successfully', 'story': new_story_data}), 201
         else:
             return jsonify({'error': 'Failed to retrieve created story'}), 500
-    
+
     @app.route('/stories/<story_id>', methods=['GET'])
     def get_story(story_id):
         stories_collection = db.stories
-        print('story_id', story_id)
-        print('all', list(stories_collection.find({})))
 
         try:
             oid = ObjectId(story_id)
@@ -77,7 +75,7 @@ def create_app():
             return jsonify(story_data)
         else:
             return jsonify({'message': 'Story not found'}), 404
-        
+
     @app.route('/leads', methods=['GET'])
     def get_leads():
         print("Getting leads...\n")
@@ -90,7 +88,7 @@ def create_app():
         } for lead in leads]
 
         return jsonify(leads_data)
-    
+
 
     @app.route('/leads/', methods=['POST'])
     def create_lead():
@@ -114,7 +112,7 @@ def create_app():
             return jsonify({'message': 'lead created successfully', 'lead': new_lead_data}), 201
         else:
             return jsonify({'error': 'Failed to retrieve created lead'}), 500
-        
+
 
     @app.route('/leads/<lead_id>', methods=['POST'])
     def update_lead(lead_id):
