@@ -101,8 +101,12 @@ function StoryPage() {
 
       </div>
       <div className="flex flex-row justify-between p-8">
-        <IoArrowBackCircle size={arrowSize} onClick={() => prevPage()} />
-        <IoArrowForwardCircle size={arrowSize} onClick={() => nextPage()} />
+        <IoArrowBackCircle className={index > 0 ? "" : "opacity-0"} size={arrowSize} onClick={() => prevPage()} />
+        {page.type === "query" && queryResponse === "" ? (
+          <IoArrowForwardCircle className="opacity-20" size={arrowSize} />
+        ) : (
+          <IoArrowForwardCircle size={arrowSize} onClick={() => nextPage()} />
+        )}
       </div>
     </div>
   );
