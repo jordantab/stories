@@ -1,4 +1,7 @@
 from bson import ObjectId
+from bson.json_util import dumps
+from werkzeug.utils import secure_filename
+import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pymongo import MongoClient, ReturnDocument
@@ -6,7 +9,8 @@ from pymongo.server_api import ServerApi
 
 def create_app():
     app = Flask(__name__)
-    # CORS(app, resources={r"/stories": {"origins": "*"}})
+    app.config['UPLOAD_FOLDER'] = 'uploads/'
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
     CORS(app, origins="*")
 
     uri = "mongodb+srv://temp_user:1234@stories.detzj4q.mongodb.net/?retryWrites=true&w=majority&appName=Stories"
@@ -36,25 +40,57 @@ def create_app():
         } for story in stories]
 
         return jsonify(stories_data)
+    
+    def allowed_file(filename):
+        return '.' in filename and filename.lower().endswith('.pdf')
+
+    def generate_embeddings(pdf_path):
+        pass
 
     @app.route('/stories/', methods=['POST'])
     def create_story():
-        print("Creating story...\n")
-        stories_collection = db.stories
-        story_data = request.json
+        print("Createing story...\n")
+        if 'file' not in request.files:
+            return jsonify({"error": "No file part in the request"}), 400
+
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "No file selected for uploading"}), 400
+
+        # Save the PDF file
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            print(f"File {filename} uploaded successfully.")
+        else:
+            return jsonify({"error": "Allowed file types are pdf"}), 400
+
+        # Parse additional story data from form or JSON
+        story_data = request.form.to_dict()
         print(story_data)
 
         if not story_data:
-            return jsonify({"error": "No data provided"}), 400
+            return jsonify({"error": "No story data provided"}), 400
 
+        # Insert story metadata into MongoDB
         try:
-            result = stories_collection.insert_one(story_data)
-            new_story = stories_collection.find_one({'_id': result.inserted_id})
+            story_data['file_path'] = file_path
+            result = db.stories.insert_one(story_data)
+            new_story = db.stories.find_one({'_id': result.inserted_id})
         except Exception as e:
             print(e)
             return jsonify({'error': 'Failed to create story'}), 500
 
+        # Generate embeddings for each page of the PDF
         if new_story:
+            try:
+                embeddings = generate_embeddings(file_path)
+                # Store or process embeddings as needed
+            except Exception as e:
+                print(e)
+                return jsonify({'error': 'Failed to generate embeddings'}), 500
+
             new_story_data = {key: str(value) if isinstance(value, ObjectId) else value for key, value in new_story.items()}
             return jsonify({'message': 'Story created successfully', 'story': new_story_data}), 201
         else:
