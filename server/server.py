@@ -171,7 +171,8 @@ def create_app():
 
             # Include file path and embeddings in the story data
             story_data['file_path'] = file_path
-            story_data['embeddings'] = embeddings
+            # story_data['embeddings'] = embeddings
+            story_data['text_by_page'] = text_by_page
 
             # Insert story metadata and embeddings into MongoDB
             result = db.stories.insert_one(story_data)
@@ -189,7 +190,7 @@ def create_app():
             res = openai.chat.completions.create(
               model="gpt-3.5-turbo",
               messages=[
-                {"role": "system", "content": "You are a business analyst who provides the primary value prop of a document. Tell the user the main value proposition of what they say in about 30 words."},
+                {"role": "system", "content": "You are a business analyst who provides the primary value prop of a document. Tell the user the main value proposition of what they say in about 30 words. Do not mention the document."},
                 {"role": "user", "content": intro_text}
               ]
             )
@@ -216,7 +217,31 @@ def create_app():
             email_page["query_key"] = "email"
             email_page["type"] = "query"
 
-            initial_pages = [new_page, second_page, email_page]
+            full_text = " ".join(text_by_page)
+            res = openai.chat.completions.create(
+              model="gpt-3.5-turbo",
+              messages=[
+                {"role": "system", "content": "Talk about a few of the primary customers who see value from this kind of service in about 50 words"},
+                {"role": "user", "content": full_text}
+              ]
+            )
+            slide_text = res.choices[0].message.content
+            res = openai.chat.completions.create(
+              model="gpt-3.5-turbo",
+              messages=[
+                {"role": "system", "content": "You are a title generator, give a good powerpoint slide title of maybe 5 words for the user's text. Do not include quotes."},
+                {"role": "user", "content": value_prop}
+              ]
+            )
+            slide_title = res.choices[0].message.content
+            fourth_page = {}
+            fourth_page["story_id"] = new_story["_id"]
+            fourth_page["number"] = 3
+            fourth_page["title"] = slide_title
+            fourth_page["text"] = slide_text
+            fourth_page["type"] = "display"
+
+            initial_pages = [new_page, second_page, email_page, fourth_page]
             db.stories.update_one(
                 {"_id": new_story["_id"]},
                 {"$set": {"pages": initial_pages}}
