@@ -5,15 +5,15 @@
     "pages": [
         {
             "number": 0,
-            "title": "Introduction",
-            "text": "Hello",
+            "title": "Title Page",
+            "text": "Welcome",
             "img_url": "",
             "type": "display"
         },
         {
             "number": 1,
-            "title": "Introduction",
-            "text": "Hello",
+            "title": "Introductio Page",
+            "text": "Introduction",
             "img_url": "",
             "type": "display"
         }
