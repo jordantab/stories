@@ -28,7 +28,7 @@ function Admin() {
   });
 
   function fetchStories() {
-    let stories = axios.get(HOST + "stories").then(res => {
+    axios.get(HOST + "stories").then(res => {
       console.log("Got stories list", res.data)
       setItems(res.data)
     }).catch(err => {
@@ -116,6 +116,22 @@ function Admin() {
 }
 
 function story(story: Story) {
+  function downloadLeads() {
+    axios.get(HOST + "leads").then(res => {
+      console.log("Got leads list", res.data)
+      let filtered: any[] = []
+      for (let i=0; i<res.data.length; i++) {
+        let lead = res.data[i]
+        if (lead.story_id === story._id) {
+          filtered.push(lead)
+        }
+      }
+      console.log("Filtered list", filtered)
+    }).catch(err => {
+      console.log("ERR:", err)
+    })
+  }
+
   return (
     <div className="w-full border p-4 rounded flex flex-row justify-between items-center">
       <div className="flex flex-col">
@@ -123,7 +139,7 @@ function story(story: Story) {
         <div className="text-md">{story.tagline}</div>
       </div>
       <div className="flex flex-row space-x-4">
-        <button className="border rounded p-2 flex flex-row space-x-2"><LuDownload size={24} /><div className="font-bold">Download leads</div></button>
+        <button className="border rounded p-2 flex flex-row space-x-2" onClick={() => downloadLeads()}><LuDownload size={24} /><div className="font-bold">Download leads</div></button>
         <Link to={"/story/" + story._id}><button className="border rounded p-2"><MdOutlineShare size={24} /></button></Link>
         <button className="border rounded p-2"><HiOutlineTrash size={24} /></button>
       </div>

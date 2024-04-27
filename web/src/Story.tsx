@@ -83,7 +83,7 @@ function StoryPage() {
 
   useEffect(() => {
     // loadPage(0)
-    axios.post(HOST + "leads", {visited: true}).then(res => {
+    axios.post(HOST + "leads", {story_id: story_id}).then(res => {
       let leadId = res.data.lead._id
       setLeadId(leadId)
     }).catch(err => {
