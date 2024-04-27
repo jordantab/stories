@@ -24,6 +24,7 @@ const DEFAULT_ITEMS = [
 
 function Admin() {
   const [items, setItems] = useState<Story[]>(DEFAULT_ITEMS)
+  const [showModal, setShowModal] = useState(true)
   return (
     <div className="flex flex-col h-screen">
       <div className="p-4 flex flex-row justify-between items-center border-b">
@@ -34,6 +35,7 @@ function Admin() {
         <h1 className="text-5xl">Your Stories</h1>
         {items.map(item => story(item))}
       </div>
+      {showModal ? modal() : undefined}
     </div>
   );
 }
@@ -51,6 +53,20 @@ function story(story: Story) {
         <button className="border rounded p-2"><HiOutlineTrash size={24} /></button>
       </div>
     </div>
+  )
+}
+
+function modal() {
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex justify-center items-center">
+      <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h2 className="text-3xl font-bold mb-4">New Story</h2>
+          <p className="mb-4 text-gray-500">Story will be automatically generated with GenAI from any of your existing white papers or docs</p>
+          <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Close Modal
+          </button>
+      </div>
+  </div>
   )
 }
 
