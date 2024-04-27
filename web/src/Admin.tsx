@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 
+import { useDropzone } from 'react-dropzone';
+
 import { MdOutlineShare } from "react-icons/md";
 import { HiOutlineTrash } from "react-icons/hi";
 import { LuDownload } from "react-icons/lu";
@@ -35,7 +37,7 @@ function Admin() {
         <h1 className="text-5xl">Your Stories</h1>
         {items.map(item => story(item))}
       </div>
-      {showModal ? modal() : undefined}
+      {showModal ? Modal() : undefined}
     </div>
   );
 }
@@ -56,12 +58,22 @@ function story(story: Story) {
   )
 }
 
-function modal() {
+function Modal() {
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop: (acceptedFiles) => {
+      console.log(acceptedFiles);
+    }
+  });
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex justify-center items-center">
       <div className="bg-white p-6 rounded-lg shadow-lg">
           <h2 className="text-3xl font-bold mb-4">New Story</h2>
           <p className="mb-4 text-gray-500">Story will be automatically generated with GenAI from any of your existing white papers or docs</p>
+          <p className="text-sm">Upload your pdf</p>
+          <div {...getRootProps({ className: 'dropzone border-dashed border-4 border-gray-300 p-10 text-center' })}>
+              <input {...getInputProps()} />
+              <p>Drag 'n' drop some files here, or click to select files</p>
+            </div>
           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
               Close Modal
           </button>
