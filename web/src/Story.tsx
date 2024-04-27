@@ -42,6 +42,14 @@ function StoryPage() {
     })
   }
 
+  function nextPage() {
+    loadPage(index + 1)
+  }
+
+  function prevPage() {
+    loadPage(index - 1)
+  }
+
   useEffect(() => {
     loadPage(0)
   }, []);
@@ -62,8 +70,8 @@ function StoryPage() {
         <p className="text-2xl">{page.text}</p>
       </div>
       <div className="flex flex-row justify-between p-8">
-        <IoArrowBackCircle size={arrowSize} />
-        <IoArrowForwardCircle size={arrowSize} />
+        <IoArrowBackCircle size={arrowSize} onClick={() => prevPage()} />
+        <IoArrowForwardCircle size={arrowSize} onClick={() => nextPage()} />
       </div>
     </div>
   );
