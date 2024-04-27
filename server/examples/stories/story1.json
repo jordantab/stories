@@ -1,0 +1,21 @@
+{
+    "name": "test1",
+    "company": "Nike",
+    "tagline": "Just do it!",
+    "pages": [
+        {
+            "number": 0,
+            "title": "Introduction",
+            "text": "Hello",
+            "img_url": "",
+            "type": "display"
+        },
+        {
+            "number": 1,
+            "title": "Introduction",
+            "text": "Hello",
+            "img_url": "",
+            "type": "display"
+        }
+    ]
+}
