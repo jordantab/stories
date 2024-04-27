@@ -16,9 +16,11 @@ import { HOST, Story, Page } from './shared'
 function Admin() {
   const [items, setItems] = useState<Story[]>([])
   const [showModal, setShowModal] = useState(false)
+  const [files, setFiles] = useState<any>([])
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles) => {
+      setFiles(acceptedFiles)
       console.log(acceptedFiles);
     }
   });
@@ -36,6 +38,29 @@ function Admin() {
     };
   }, []);
 
+  function createStory() {
+    const formData = new FormData();
+    files.forEach((file: any, index: number) => {
+      formData.append(`file-${index}`, file);
+    });
+
+    const config = {
+      headers: {
+        'content-type': 'multipart/form-data',
+      },
+    };
+
+    axios.post(HOST + "stories", formData, config)
+      .then((response) => {
+        console.log(response.data);
+        setShowModal(false)
+        console.log("Upload complete")
+      })
+      .catch((error) => {
+        console.error("Error uploading files: ", error);
+      });
+  }
+
   function Modal() {
     return (
       <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex justify-center items-center">
@@ -46,6 +71,7 @@ function Admin() {
             <div {...getRootProps({ className: 'dropzone border border-gray-300 rounded-lg p-10 text-center' })}>
                 <input {...getInputProps()} />
                 <div className="flex flex-row justify-center items-center space-x-2"><MdOutlineFileUpload size={18} /><p>Drop files here</p></div>
+                {files.map((f: any) => <div>{f.name}</div>)}
               </div>
             <div className="flex flex-row justify-end pt-4 space-x-4">
               <button className="bg-gray-100 hover:bg-gray-300 border font-bold py-2 px-4 rounded"
@@ -54,7 +80,7 @@ function Admin() {
                   Cancel
               </button>
               <button className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() => setShowModal(false)}
+              onClick={() => createStory()}
               >
                   Create
               </button>
