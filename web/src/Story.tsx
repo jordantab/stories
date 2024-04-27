@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 
+import { IoArrowBackCircle } from "react-icons/io5";
+import { IoArrowForwardCircle } from "react-icons/io5";
+
 function nums(size: number) {
   return new Array(size).fill(null).map((_, i) => i)
 }
@@ -12,6 +15,9 @@ function makeBar(dark: boolean) {
 
 function Story() {
   const [page, setPage] = useState(0)
+
+  const arrowSize = 64
+
   return (
     <div className="h-screen flex flex-col">
       <div className="flex flex-row justify-around px-20 py-4">
@@ -20,7 +26,10 @@ function Story() {
         })}
       </div>
       <div className="flex-grow">Content</div>
-      <div className="">Paging</div>
+      <div className="flex flex-row justify-between p-8">
+        <IoArrowBackCircle size={arrowSize} />
+        <IoArrowForwardCircle size={arrowSize} />
+      </div>
     </div>
   );
 }
