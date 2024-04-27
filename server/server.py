@@ -46,7 +46,7 @@ def create_app():
         } for story in stories]
 
         return jsonify(stories_data)
-    
+
     def allowed_file(filename):
         return '.' in filename and filename.lower().endswith('.pdf')
 
@@ -204,6 +204,7 @@ def create_app():
         print("Updating lead...\n")
         leads_collection = db.leads
         update_data = request.json
+        print("Updating lead", lead_id, "with data", update_data)
 
         try:
             oid = ObjectId(lead_id)
