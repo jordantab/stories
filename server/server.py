@@ -1,7 +1,7 @@
 from bson import ObjectId
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-from pymongo import MongoClient
+from pymongo import MongoClient, ReturnDocument
 from pymongo.server_api import ServerApi
 
 def create_app():
@@ -67,6 +67,27 @@ def create_app():
 
         return jsonify(leads_data)
     
+    @app.route('/leads/<lead_id>', methods=['POST'])
+    def update_lead(lead_id):
+        print("Updating lead...\n")
+        leads_collection = db.leads
+        update_data = request.json
+
+        try:
+            oid = ObjectId(lead_id)
+            result = leads_collection.find_one_and_update(
+            {'_id': oid},
+            {'$set': update_data},
+            return_document=ReturnDocument.AFTER
+        )
+        except Exception as e:
+            return jsonify({'error': str(e)}), 400
+
+        if result:
+            updated_lead = {key: str(value) if isinstance(value, ObjectId) else value for key, value in result.items()}
+            return jsonify(updated_lead)
+        else:
+            return jsonify({'message': 'Lead not found'}), 404
     return app
 
 if __name__ == '__main__':
