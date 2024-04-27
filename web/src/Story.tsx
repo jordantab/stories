@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 
 import axios from 'axios'
+import { v4 as uuid } from 'uuid'
 
 import { IoArrowBackCircle } from "react-icons/io5";
 import { IoArrowForwardCircle } from "react-icons/io5";
@@ -38,6 +39,7 @@ const TEST_PAGE_2: Page = {
 }
 
 function StoryPage() {
+  const [leadId, setLeadId] = useState<string|undefined>(undefined)
   const [index, setIndex] = useState(0)
   const [page, setPage] = useState<Page|undefined>(TEST_PAGE_2)
   const [queryResponse, setQueryResponse] = useState("")
@@ -60,7 +62,19 @@ function StoryPage() {
   }
 
   function nextPage() {
-    loadPage(index + 1)
+    if (page !== undefined && page.type === "query") {
+      console.log("leadId is now", leadId)
+      axios.post(HOST + "leads/" + leadId, {
+
+      }).then(res => {
+        console.log("Success!", res.data)
+        loadPage(index + 1)
+      }).catch(err => {
+        console.log("Failed to register lead progress", err)
+      })
+    } else {
+      loadPage(index + 1)
+    }
   }
 
   function prevPage() {
@@ -68,7 +82,13 @@ function StoryPage() {
   }
 
   useEffect(() => {
-    loadPage(0)
+    // loadPage(0)
+    axios.post(HOST + "leads", {visited: true}).then(res => {
+      let leadId = res.data.lead._id
+      setLeadId(leadId)
+    }).catch(err => {
+      console.log("Failed to register lead start")
+    })
   }, []);
 
   if (page === undefined) {
