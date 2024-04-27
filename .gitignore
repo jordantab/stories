@@ -1,1 +1,4 @@
 server/uploads/
+server/white_papers/
+server/.env
+.DS_Store
