@@ -34,6 +34,20 @@ def create_app():
     def home():
         return 'Hello, World!'
 
+    def convert_objectid_to_str(data):
+        if isinstance(data, dict):
+            for key, value in data.items():
+                if isinstance(value, ObjectId):
+                    data[key] = str(value)
+                elif isinstance(value, (dict, list)):
+                    convert_objectid_to_str(value)
+        elif isinstance(data, list):
+            for index, item in enumerate(data):
+                if isinstance(item, ObjectId):
+                    data[index] = str(item)
+                elif isinstance(item, (dict, list)):
+                    convert_objectid_to_str(item)
+
     @app.route('/stories', methods=['GET'])
     def get_stories():
         print("Getting stories...\n")
@@ -44,6 +58,7 @@ def create_app():
             key: str(value) if isinstance(value, ObjectId) else value
             for key, value in story.items()
         } for story in stories]
+        convert_objectid_to_str(stories_data)
 
         return jsonify(stories_data)
 
@@ -84,7 +99,7 @@ def create_app():
                 input=text,
                 model="text-embedding-ada-002"
                 )
-                print(response.data)
+                # print(response.data)
                 if response:
                     embeddings.append(response.data[0].embedding)
         except Exception as e:
@@ -162,6 +177,51 @@ def create_app():
             result = db.stories.insert_one(story_data)
             new_story = db.stories.find_one({'_id': result.inserted_id})
 
+            new_page = {}
+            new_page["story_id"] = new_story["_id"]
+            new_page["number"] = 0
+            new_page["title"] = story_data["name"]
+            new_page["text"] = story_data["tagline"]
+            new_page["type"] = "display"
+
+            intro_text = text_by_page[0] + text_by_page[1] + text_by_page[2] + text_by_page[3]
+            openai.api_key = app.config['OPENAI_API_KEY']
+            res = openai.chat.completions.create(
+              model="gpt-3.5-turbo",
+              messages=[
+                {"role": "system", "content": "You are a business analyst who provides the primary value prop of a document. Tell the user the main value proposition of what they say in about 30 words."},
+                {"role": "user", "content": intro_text}
+              ]
+            )
+            value_prop = res.choices[0].message.content
+            res = openai.chat.completions.create(
+              model="gpt-3.5-turbo",
+              messages=[
+                {"role": "system", "content": "You are a title generator, give a good powerpoint slide title of maybe 5 words for the user's text. Do not include quotes."},
+                {"role": "user", "content": value_prop}
+              ]
+            )
+            slide_title = res.choices[0].message.content
+            second_page = {}
+            second_page["story_id"] = new_story["_id"]
+            second_page["number"] = 1
+            second_page["title"] = slide_title
+            second_page["text"] = value_prop
+            second_page["type"] = "display"
+
+            email_page = {}
+            email_page["story_id"] = new_story["_id"]
+            email_page["number"] = 2
+            email_page["text"] = "Let's start with your email"
+            email_page["query_key"] = "email"
+            email_page["type"] = "query"
+
+            initial_pages = [new_page, second_page, email_page]
+            db.stories.update_one(
+                {"_id": new_story["_id"]},
+                {"$set": {"pages": initial_pages}}
+            )
+
             if new_story:
                 new_story_data = {key: str(value) if isinstance(value, ObjectId) else value for key, value in new_story.items()}
                 return jsonify({'message': 'Story created successfully', 'story': new_story_data}), 201
@@ -178,11 +238,14 @@ def create_app():
         try:
             oid = ObjectId(story_id)
             story = stories_collection.find_one({'_id': oid})
+            print("STORY:", story)
         except:
             return jsonify({'error': 'Invalid story story_id'}), 400
 
         if story:
             story_data = {key: str(value) if isinstance(value, ObjectId) else value for key, value in story.items()}
+            print("Returning story data")
+            convert_objectid_to_str(story_data)
             return jsonify(story_data)
         else:
             return jsonify({'message': 'Story not found'}), 404

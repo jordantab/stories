@@ -42,7 +42,7 @@ const TEST_PAGE_2: Page = {
 function StoryPage() {
   const [leadId, setLeadId] = useState<string|undefined>(undefined)
   const [index, setIndex] = useState(0)
-  const [page, setPage] = useState<Page|undefined>(TEST_PAGE_2)
+  const [page, setPage] = useState<Page|undefined>(undefined)
   const [queryResponse, setQueryResponse] = useState("")
 
   const { story_id } = useParams();
@@ -83,7 +83,7 @@ function StoryPage() {
   }
 
   useEffect(() => {
-    // loadPage(0)
+    loadPage(0)
     axios.post(HOST + "leads", {story_id: story_id}).then(res => {
       let leadId = res.data.lead._id
       setLeadId(leadId)
