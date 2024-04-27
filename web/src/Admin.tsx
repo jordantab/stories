@@ -1,6 +1,8 @@
 
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+import axios from 'axios'
 
 import { useDropzone } from 'react-dropzone';
 
@@ -9,31 +11,46 @@ import { HiOutlineTrash } from "react-icons/hi";
 import { LuDownload } from "react-icons/lu";
 import { MdOutlineFileUpload } from "react-icons/md";
 
-interface Story {
+interface Page {
+  number: number,
   title: string,
-  subtitle: string,
+  text: string,
+  type: "query" | "display",
+  img_url: string,
 }
 
-const DEFAULT_ITEMS = [
-  {
-    title: "The Big Book of Generative AI",
-    subtitle: "White Paper",
-  },
-  {
-    title: "MLOps for Dummies",
-    subtitle: "E-Book",
-  },
-]
+interface Story {
+  _id: string,
+  name: string,
+  company: string,
+  tagline: string,
+  pages: Page[],
+}
+
+const HOST="http://localhost:5000/"
 
 function Admin() {
-  const [items, setItems] = useState<Story[]>(DEFAULT_ITEMS)
-  const [showModal, setShowModal] = useState(true)
+  const [items, setItems] = useState<Story[]>([])
+  const [showModal, setShowModal] = useState(false)
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles) => {
       console.log(acceptedFiles);
     }
   });
+
+  useEffect(() => {
+    console.log('Component loaded');
+    let stories = axios.get(HOST + "stories").then(res => {
+    console.log("Got stories list", res.data)
+      setItems(res.data)
+    }).catch(err => {
+      console.log("ERR:", err)
+    })
+    return () => {
+      console.log('Component unmounted');
+    };
+  }, []);
 
   function Modal() {
     return (
@@ -84,8 +101,8 @@ function story(story: Story) {
   return (
     <div className="w-full border p-4 rounded flex flex-row justify-between items-center">
       <div className="flex flex-col">
-        <div className="text-lg font-bold">{story.title}</div>
-        <div className="text-md">{story.subtitle}</div>
+        <div className="text-lg font-bold">{story.name}</div>
+        <div className="text-md">{story.tagline}</div>
       </div>
       <div className="flex flex-row space-x-4">
         <button className="border rounded p-2 flex flex-row space-x-2"><LuDownload size={24} /><div className="font-bold">Download leads</div></button>
