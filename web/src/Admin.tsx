@@ -7,6 +7,7 @@ import { useDropzone } from 'react-dropzone';
 import { MdOutlineShare } from "react-icons/md";
 import { HiOutlineTrash } from "react-icons/hi";
 import { LuDownload } from "react-icons/lu";
+import { MdOutlineFileUpload } from "react-icons/md";
 
 interface Story {
   title: string,
@@ -70,13 +71,18 @@ function Modal() {
           <h2 className="text-3xl font-bold mb-4">New Story</h2>
           <p className="mb-4 text-gray-500">Story will be automatically generated with GenAI from any of your existing white papers or docs</p>
           <p className="text-sm">Upload your pdf</p>
-          <div {...getRootProps({ className: 'dropzone border-dashed border-4 border-gray-300 p-10 text-center' })}>
+          <div {...getRootProps({ className: 'dropzone border border-gray-300 rounded-lg p-10 text-center' })}>
               <input {...getInputProps()} />
-              <p>Drag 'n' drop some files here, or click to select files</p>
+              <div className="flex flex-row justify-center items-center space-x-2"><MdOutlineFileUpload size={18} /><p>Drop files here</p></div>
             </div>
-          <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              Close Modal
-          </button>
+          <div className="flex flex-row justify-end">
+            <button className="bg-gray-100 hover:bg-gray-300 border font-bold py-2 px-4 rounded">
+                Cancel
+            </button>
+            <button className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                Create
+            </button>
+          </div>
       </div>
   </div>
   )
