@@ -136,6 +136,32 @@ def create_app():
 #     print(generate_image(test_text))
 #     exit()
 
+    def create_display_page(story_id, number, doc_text, role):
+        openai.api_key = app.config['OPENAI_API_KEY']
+        res = openai.chat.completions.create(
+          model="gpt-3.5-turbo",
+          messages=[
+            {"role": "system", "content": role},
+            {"role": "user", "content": doc_text}
+          ]
+        )
+        slide_text = res.choices[0].message.content
+        res = openai.chat.completions.create(
+          model="gpt-3.5-turbo",
+          messages=[
+            {"role": "system", "content": "You are a title generator, give a good powerpoint slide title of maybe 5 words for the user's text. Do not include quotes."},
+            {"role": "user", "content": slide_text}
+          ]
+        )
+        slide_title = res.choices[0].message.content
+        fourth_page = {}
+        fourth_page["story_id"] = story_id
+        fourth_page["number"] = number
+        fourth_page["title"] = slide_title
+        fourth_page["text"] = slide_text
+        fourth_page["type"] = "display"
+        return fourth_page
+
     @app.route('/stories/', methods=['POST'])
     def create_story():
         print("Creating story...\n")
@@ -186,29 +212,7 @@ def create_app():
             new_page["type"] = "display"
 
             intro_text = text_by_page[0] + text_by_page[1] + text_by_page[2] + text_by_page[3]
-            openai.api_key = app.config['OPENAI_API_KEY']
-            res = openai.chat.completions.create(
-              model="gpt-3.5-turbo",
-              messages=[
-                {"role": "system", "content": "You are a business analyst who provides the primary value prop of a document. Tell the user the main value proposition of what they say in about 30 words. Do not mention the document."},
-                {"role": "user", "content": intro_text}
-              ]
-            )
-            value_prop = res.choices[0].message.content
-            res = openai.chat.completions.create(
-              model="gpt-3.5-turbo",
-              messages=[
-                {"role": "system", "content": "You are a title generator, give a good powerpoint slide title of maybe 5 words for the user's text. Do not include quotes."},
-                {"role": "user", "content": value_prop}
-              ]
-            )
-            slide_title = res.choices[0].message.content
-            second_page = {}
-            second_page["story_id"] = new_story["_id"]
-            second_page["number"] = 1
-            second_page["title"] = slide_title
-            second_page["text"] = value_prop
-            second_page["type"] = "display"
+            second_page = create_display_page(new_story["_id"], 1, intro_text, "You are a business analyst who provides the primary value prop of a document. Tell the user the main value proposition of what they say in about 30 words. Do not mention the document.")
 
             email_page = {}
             email_page["story_id"] = new_story["_id"]
@@ -218,28 +222,7 @@ def create_app():
             email_page["type"] = "query"
 
             full_text = " ".join(text_by_page)
-            res = openai.chat.completions.create(
-              model="gpt-3.5-turbo",
-              messages=[
-                {"role": "system", "content": "Talk about a few of the primary customers who see value from this kind of service in about 50 words"},
-                {"role": "user", "content": full_text}
-              ]
-            )
-            slide_text = res.choices[0].message.content
-            res = openai.chat.completions.create(
-              model="gpt-3.5-turbo",
-              messages=[
-                {"role": "system", "content": "You are a title generator, give a good powerpoint slide title of maybe 5 words for the user's text. Do not include quotes."},
-                {"role": "user", "content": value_prop}
-              ]
-            )
-            slide_title = res.choices[0].message.content
-            fourth_page = {}
-            fourth_page["story_id"] = new_story["_id"]
-            fourth_page["number"] = 3
-            fourth_page["title"] = slide_title
-            fourth_page["text"] = slide_text
-            fourth_page["type"] = "display"
+            fourth_page = create_display_page(new_story["_id"], 3, full_text, "Talk about a few of the primary customers who see value from this kind of service in about 50 words")
 
             initial_pages = [new_page, second_page, email_page, fourth_page]
             db.stories.update_one(
@@ -263,7 +246,7 @@ def create_app():
         try:
             oid = ObjectId(story_id)
             story = stories_collection.find_one({'_id': oid})
-            print("STORY:", story)
+            # print("STORY:", story)
         except:
             return jsonify({'error': 'Invalid story story_id'}), 400
 
@@ -330,11 +313,43 @@ def create_app():
         except Exception as e:
             return jsonify({'error': str(e)}), 400
 
+        if update_data["email"]:
+            print("Updating for email")
+            domain = update_data["email"].split("@")[1]
+
+            story_id = update_data["storyId"]
+            print("storyId is:", story_id)
+            story = db.stories.find_one({'_id': ObjectId(story_id)})
+            print("story", story)
+            full_text = " ".join(story["text_by_page"])
+            page_five = create_display_page(story_id, 4, full_text, "Mention in about 30 words how our product has worked well for a similar company given that the user works for " + domain)
+            page_six = create_display_page(story_id, 5, full_text, "Mention in about 30 words how our product will solve the user's problems given that the user works for " + domain)
+
+            email_page = {}
+            email_page["story_id"] = story_id
+            email_page["number"] = 6
+            email_page["text"] = "What is your role at " + domain + "?"
+            email_page["query_key"] = "role"
+            email_page["type"] = "query"
+
+            page_eight = create_display_page(story_id, 7, full_text, "Mention in about 30 words how easy it is to use the product")
+
+            initial_pages = [page_five, page_six, email_page, page_eight]
+            all_pages = story["pages"] + initial_pages
+            print("all-pages:", all_pages)
+            db.stories.update_one(
+                {"_id": ObjectId(story_id)},
+                {"$set": {"pages": all_pages}}
+            )
+            story = db.stories.find_one({'_id': ObjectId(story_id)})
+            print("story", story)
+
         if result:
             updated_lead = {key: str(value) if isinstance(value, ObjectId) else value for key, value in result.items()}
             return jsonify(updated_lead)
         else:
             return jsonify({'message': 'Lead not found'}), 404
+    # print("story", db.stories.find_one({'_id': ObjectId("662d9690f044ed09f58bbbb4")}))
     return app
 
 if __name__ == '__main__':

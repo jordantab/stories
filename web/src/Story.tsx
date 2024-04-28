@@ -65,10 +65,11 @@ function StoryPage() {
   function nextPage() {
     if (page !== undefined && page.type === "query" && page.query_key !== undefined) {
       console.log("leadId is now", leadId)
-      let data: any = {}
+      let data: any = {storyId: story_id}
       data[page.query_key] = queryResponse
       axios.post(HOST + "leads/" + leadId, data).then(res => {
         console.log("Success!", res.data)
+        setQueryResponse("")
         loadPage(index + 1)
       }).catch(err => {
         console.log("Failed to register lead progress", err)
