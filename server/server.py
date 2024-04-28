@@ -313,7 +313,7 @@ def create_app():
         except Exception as e:
             return jsonify({'error': str(e)}), 400
 
-        if update_data["email"]:
+        if "email" in update_data:
             print("Updating for email")
             domain = update_data["email"].split("@")[1]
 
@@ -322,8 +322,8 @@ def create_app():
             story = db.stories.find_one({'_id': ObjectId(story_id)})
             print("story", story)
             full_text = " ".join(story["text_by_page"])
-            page_five = create_display_page(story_id, 4, full_text, "Mention in about 30 words how our product has worked well for a similar company given that the user works for " + domain)
-            page_six = create_display_page(story_id, 5, full_text, "Mention in about 30 words how our product will solve the user's problems given that the user works for " + domain)
+            page_five = create_display_page(story_id, 4, full_text, "Mention in about 30 words how our product has worked well for a similar company given that the user works for " + domain + ". Do not use quotes.")
+            page_six = create_display_page(story_id, 5, full_text, "Mention in about 30 words how our product will solve the user's problems given that the user works for " + domain + ". Do not use quotes.")
 
             email_page = {}
             email_page["story_id"] = story_id
@@ -332,9 +332,29 @@ def create_app():
             email_page["query_key"] = "role"
             email_page["type"] = "query"
 
-            page_eight = create_display_page(story_id, 7, full_text, "Mention in about 30 words how easy it is to use the product")
+            page_eight = create_display_page(story_id, 7, full_text, "Mention in about 30 words how easy it is to use the product. Do not use quotes.")
 
             initial_pages = [page_five, page_six, email_page, page_eight]
+            all_pages = story["pages"] + initial_pages
+            print("all-pages:", all_pages)
+            db.stories.update_one(
+                {"_id": ObjectId(story_id)},
+                {"$set": {"pages": all_pages}}
+            )
+            story = db.stories.find_one({'_id': ObjectId(story_id)})
+            print("story", story)
+        elif "role" in update_data:
+            role = update_data["role"]
+
+            story_id = update_data["storyId"]
+            print("storyId is:", story_id)
+            story = db.stories.find_one({'_id': ObjectId(story_id)})
+            print("story", story)
+            full_text = " ".join(story["text_by_page"])
+            page_five = create_display_page(story_id, 8, full_text, "Mention in about 30 words how our product can really drive value for someone who works as a " + role + ". Do not use quotes.")
+            page_six = create_display_page(story_id, 9, full_text, "Mention in about 30 words how our product has solved problems at other companies for people who work as a " + role + ". Do not use quotes.")
+
+            initial_pages = [page_five, page_six]
             all_pages = story["pages"] + initial_pages
             print("all-pages:", all_pages)
             db.stories.update_one(
